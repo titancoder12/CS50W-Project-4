@@ -63,6 +63,13 @@ def register(request):
     else:
         return render(request, "network/register.html")
 
+def posts(request):
+    # Get all recent posts
+    posts = Post.objects.all().order_by('timestamp').values()
+
+    # Return all posts
+    return json.dumps(posts)
+
 
 def newpost(request):
     # Turn request into a readable dictionary object
@@ -79,7 +86,7 @@ def newpost(request):
             return json.dumps({"message": "Unknown key provided"})
 
         # Create post
-        post = Post(user=User(request.user), text=request_json["text"])
+        post = Post(user=User(request.user.id), text=request_json["text"])
 
         # Add post
         post.save()
@@ -94,8 +101,112 @@ def updatepost(request, id):
     # Turn request into a readable dictionary object
     request_json = json.loads(request)
 
-    # Get post
-    post = post.objects.get(id=Post(id))
-    if post 
+    # Check if post id is valid
+    if id > Post.objects.last().id:
+        # Return error message
+        return json.dumps({"message": f"Post with id of {id} does not exist"})
+
+    # Check that there are more than 0 arguments provided
+    elif len(list(request_json.keys())) == 0:
+        # Return error message
+        return json.dumps({"message": "No arguments provided in PUT request"})
+
+    # Check that there are less than two arguments provided
+    elif len(list(request_json.keys())) > 2:
+        # Return error message
+        return json.dumps({"message": "Unrecognized argument provided in PUT request"})
+    
+    # Check to see if request method is PUT
+    if request.method == "PUT":
+        # Get post from database
+        post = Post.objects.get(id=Post(id))
+
+        # Initialize variable args recieved, which will be used for checking later on
+        argsrecieved = 0
+
+        # Check to see if likes is in the PUT request
+        if "likes" in list(request_json.keys()):
+            # Update the post likes
+            post.likes = request_json["likes"]
+
+            # Save the post
+            post.save()
+
+            # Add 1 to args recieved for checking later
+            argsrecieved += 1
+
+        # Check to see if text is in the PUT request
+        if "text" in list(request_json.keys()):
+            # Update the post text
+            post.text = request_json["text"]
+
+            # Save the post
+            post.save()
+
+            # Add 1 to args recieved for checking later
+            argsrecieved += 1
+
+        # Check to see if there are more than 0 args
+        if argsrecieved <= 0:
+            # Return error message
+            return json.dumps({"message": "Unrecognized argument provided in PUT request"})
+
+        # Return success message
+        return json.dumps({"message": "Post updated successfully"})
+    else:
+        # Return error message
+        return json.dumps({"message": "PUT requests only"})
+    
+def follow(request):
+    # Turn request into a readable dictionary object
+    request_json = json.loads(request)
+    
+    # Check if request method is post
+    if request.method == "POST":
+        # Check if number of arguments is 1
+        if len(list(request_json.keys())) != 1:
+            # Return error message
+            return json.dumps({"message": f"Expected 1 arguments, instead got {len(list(request_json.keys()))} in POST request"})
+        
+        # Check if user id and action are in the list of arguments
+        elif "user_id" not in list(request_json.keys()):
+            # Return error message
+            return json.dumps({"message": "Unrecognized argument provided in POST request"})
+    
+        # Create the new follow
+        follow = Follow(follower=User(request.user.id), following=User(request_json["id"]))
+
+        # Save the follow
+        follow.save()
+
+        # Return success message
+        return json.dumps({"message": "Successfully created new follow"})
+
+    elif request.method == "PUT":
+        # Check if number of arguments is 1
+        if len(list(request_json.keys())) != 1:
+            # Return error message
+            return json.dumps({"message": f"Expected 1 argument, instead got {len(list(request_json.keys()))} in POST request"})
+        
+        # Check if user id and action are in the list of arguments
+        elif "user_id" not in list(request_json.keys()):
+            # Return error message
+            return json.dumps({"message": "Unrecognized argument provided in POST request"})
+    
+        # Get the follow
+        follow = Follow.objects.get(follower=User(request.user.id), following=User(request_json["user_id"]))
+
+        # Set status to false
+        follow.status = False
+
+        # Save the follow
+        follow.save()
+
+        # Return success message
+        return json.dumps({"message": "Successfully updated follow"})
+
+        
+            
+                 
  
 
