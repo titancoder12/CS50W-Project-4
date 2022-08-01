@@ -1,5 +1,22 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
-    TODO
+    <h1 class="ms-2">All Posts</h1>
+    {% if user.is_authenticated %}
+    <div id="createpost" class="card ms-2">
+        <div class="card-body ms-2">
+            <h3 class="ms-2">Create Post</h3>
+            <textarea class="form-control" id="posttext" placeholder="What's on your mind?" style="height: 100px"></textarea>
+            <button class="btn btn-primary" id="postbutton">Post</button>
+        </div>
+    </div>
+    <div id="posts"> 
+    <div id="profile-view">
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+    <!--script type="module" src="/path/to/js.cookie.mjs"></script-->
+    <script src="{% static 'network/index.js' %}"></script>
 {% endblock %}

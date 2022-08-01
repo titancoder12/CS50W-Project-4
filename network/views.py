@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.urls import reverse
 import json
@@ -65,28 +66,35 @@ def register(request):
 
 def posts(request):
     # Get all recent posts
-    posts = Post.objects.all().order_by('timestamp').values()
+    posts = Post.objects.all().order_by('-id').values()
 
     # Return all posts
-    return json.dumps(posts)
+    return JsonResponse([post for post in posts], safe=False)
+
+def user(request, id):
+    user = User.objects.get(id=id)
+    username = user.username
+    return JsonResponse({"username": username}, safe=True)
+    
 
 
+@csrf_exempt
 def newpost(request):
+    #print(json.loads(request.body))
     # Turn request into a readable dictionary object
-    request_json = json.loads(request)
-
+    request_json = json.loads(request.body)
     # Check if request method is POST
     if request.method == "POST":
         # Check if text is provided in request 
-        if not request_json.has_key("text"):
-            return json.dumps({"message": "Text not provided"})
+        #if not ("text" in list(request_json.keys())):
+        #    return json.dumps({"message": "Text not provided"})
 
         # Check if all keys in request are valid
-        if not (list(request_json.keys()) == ["text"]):
-            return json.dumps({"message": "Unknown key provided"})
+        #if not (list(request_json.keys()) == ["text"]):
+        #ge    return json.dumps({"message": "Unknown key provided"})
 
         # Create post
-        post = Post(user=User(request.user.id), text=request_json["text"])
+        post = Post(user=User(request.user.id), text=request_json.get("text", ""))
 
         # Add post
         post.save()
@@ -99,22 +107,22 @@ def newpost(request):
 
 def updatepost(request, id):
     # Turn request into a readable dictionary object
-    request_json = json.loads(request)
+    request_json = json.loads(request.body)
 
     # Check if post id is valid
-    if id > Post.objects.last().id:
-        # Return error message
-        return json.dumps({"message": f"Post with id of {id} does not exist"})
+    # if id > Post.objects.last().id:
+    #     # Return error message
+    #     return json.dumps({"message": f"Post with id of {id} does not exist"})
 
-    # Check that there are more than 0 arguments provided
-    elif len(list(request_json.keys())) == 0:
-        # Return error message
-        return json.dumps({"message": "No arguments provided in PUT request"})
+    # # Check that there are more than 0 arguments provided
+    # elif len(list(request_json.keys())) == 0:
+    #     # Return error message
+    #     return json.dumps({"message": "No arguments provided in PUT request"})
 
-    # Check that there are less than two arguments provided
-    elif len(list(request_json.keys())) > 2:
-        # Return error message
-        return json.dumps({"message": "Unrecognized argument provided in PUT request"})
+    # # Check that there are less than two arguments provided
+    # elif len(list(request_json.keys())) > 2:
+    #     # Return error message
+    #     return json.dumps({"message": "Unrecognized argument provided in PUT request"})
     
     # Check to see if request method is PUT
     if request.method == "PUT":
@@ -127,7 +135,7 @@ def updatepost(request, id):
         # Check to see if likes is in the PUT request
         if "likes" in list(request_json.keys()):
             # Update the post likes
-            post.likes = request_json["likes"]
+            post.likes = request_json.get("likes", "")
 
             # Save the post
             post.save()
@@ -138,7 +146,7 @@ def updatepost(request, id):
         # Check to see if text is in the PUT request
         if "text" in list(request_json.keys()):
             # Update the post text
-            post.text = request_json["text"]
+            post.text = request_json.get("text", "")
 
             # Save the post
             post.save()
@@ -157,12 +165,15 @@ def updatepost(request, id):
         # Return error message
         return json.dumps({"message": "PUT requests only"})
     
-def follow(request):
+def follow(request, user_id=None):
     # Turn request into a readable dictionary object
-    request_json = json.loads(request)
-    
+    request_json = json.loads(request.body)
+    if request.method == "GET":
+        if user_id == None:
+            return json.dumps({"message": "Missing argument 'user_id' in GET request"})
+        follow = Follow.objects.get(follower=User(request.user.id), following=User(user_id))
     # Check if request method is post
-    if request.method == "POST":
+    elif request.method == "POST":
         # Check if number of arguments is 1
         if len(list(request_json.keys())) != 1:
             # Return error message
