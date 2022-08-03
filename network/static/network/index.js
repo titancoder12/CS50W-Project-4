@@ -19,15 +19,15 @@ function addpost(){
         document.querySelector('#posttext').value = '';
         clear();
         loadposts();
-    })
+    });
     return false;
 }
 
-function like(post_id, likes) {
+function like(post_id) {
     fetch('/post/'+post_id, {
         method: 'PUT',
         body: JSON.stringify({
-            likes: likes + 1
+            addlikes: 1
         })
     });
 }
@@ -45,10 +45,7 @@ function loadposts(){
             fetch('/user/'+myresult[i]["user_id"])
             .then((result)=>result.json())
             .then((result) => {
-                console.log(result.username);
                 username = result.username;
-                console.log(username);
-                console.log(username);
                 const postdiv = document.createElement('div');
                 postdiv.innerHTML = `<div class="card-body ms-2"><h5 class="ms-2">${username}</h5>${myresult[i].text}<hr><p style="color: rgb(211, 211, 211)">${myresult[i].timestamp}</p></div>`;
                 postdiv.classList.add('card');
@@ -58,7 +55,8 @@ function loadposts(){
                 const likebtn = document.createElement('i');
                 likebtn.className = "bi bi-heart ms-4";
                 likebtn.addEventListener('click', function() {
-                    like();
+                    likebtn.className = "ms-4 bi bi-heart-fill"; 
+                    like(myresult[i]["id"]);
                 });
                 postdiv.append(likebtn);
             })

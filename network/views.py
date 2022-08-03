@@ -135,7 +135,7 @@ def updatepost(request, id):
         # Check to see if likes is in the PUT request
         if "likes" in list(request_json.keys()):
             # Update the post likes
-            post.likes = request_json.get("likes", "")
+            post.likes = post.likes + request_json.get("addlikes", "")
 
             # Save the post
             post.save()
