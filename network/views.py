@@ -105,6 +105,7 @@ def newpost(request):
     # Return error message if request method is not POST
     return json.dumps({"message": "POST requests only"})
 
+@csrf_exempt
 def updatepost(request, id):
     # Turn request into a readable dictionary object
     request_json = json.loads(request.body)
@@ -126,8 +127,9 @@ def updatepost(request, id):
     
     # Check to see if request method is PUT
     if request.method == "PUT":
+        print(request_json)
         # Get post from database
-        post = Post.objects.get(id=Post(id))
+        post = Post.objects.get(id=id)
 
         # Initialize variable args recieved, which will be used for checking later on
         argsrecieved = 0
@@ -135,7 +137,7 @@ def updatepost(request, id):
         # Check to see if likes is in the PUT request
         if "likes" in list(request_json.keys()):
             # Update the post likes
-            post.likes = request_json.get("likes", "")
+            post.likes = post.likes + 1
 
             # Save the post
             post.save()

@@ -23,11 +23,11 @@ function addpost(){
     return false;
 }
 
-function like(post_id, likes) {
+function like(post_id) {
     fetch('/post/'+post_id, {
         method: 'PUT',
         body: JSON.stringify({
-            likes: likes + 1
+            likes: 1
         })
     });
 }
@@ -55,10 +55,11 @@ function loadposts(){
                 postdiv.classList.add('ms-2');
                 document.querySelector('#posts').append(postdiv);
 
-                const likebtn = document.createElement('i');
+                const likebtn = document.createElement('i')
                 likebtn.className = "bi bi-heart ms-4";
                 likebtn.addEventListener('click', function() {
-                    like();
+                    likebtn.className = "bi bi-heart ms-4";
+                    like(myresult[i]["id"]);
                 });
                 postdiv.append(likebtn);
             })
