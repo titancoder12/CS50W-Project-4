@@ -15,9 +15,11 @@ function addpost(){
             text: text
         })
     }).then((result)=>console.log(result))
-    document.querySelector('#posttext').value = '';
-    clear();
-    loadposts();
+    .then(()=>{
+        document.querySelector('#posttext').value = '';
+        clear();
+        loadposts();
+    })
     return false;
 }
 
@@ -53,12 +55,12 @@ function loadposts(){
                 postdiv.classList.add('ms-2');
                 document.querySelector('#posts').append(postdiv);
 
-                const likebtn = document.createElement('button');
-                likebtn.innerHTML = 'Like';
+                const likebtn = document.createElement('i');
+                likebtn.className = "bi bi-heart ms-4";
                 likebtn.addEventListener('click', function() {
-                    like()
+                    like();
                 });
-document.querySelector('#container').append(element);
+                postdiv.append(likebtn);
             })
         };
     });

@@ -15,10 +15,6 @@ class Follow(models.Model):
         else:
             return True
 
-class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="like")
-    post = models.ForeignKey(Post, on_delete=models.PROTECT, related_name="likes")
-
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     text = models.TextField()
@@ -33,3 +29,6 @@ class Post(models.Model):
             "likes": self.likes
         }
 
+# class Like(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="like")
+#     post = models.ForeignKey(Post, on_delete=models.PROTECT, related_name="likes")
