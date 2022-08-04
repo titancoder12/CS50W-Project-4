@@ -136,7 +136,7 @@ def updatepost(request, id):
 
         # Check to see if likes is in the PUT request
         if "addlikes" in list(request_json.keys()):
-            like = Like(user=User(request.user.id), post=post)
+            like = Like(user=User(request.user.id), post=Post(post))
             like.save()
 
             # Update the post likes
@@ -236,8 +236,8 @@ def follow(request, user_id=None):
         return json.dumps({"message": "Successfully updated follow"})
 
 def like(request, id):
-    like = Like.objects.filter(post=id, user=request.user.id).count()
-    print(Like.objects.filter(post=id, user=request.user.id))
+    like = Like.objects.filter(user=User(request.user.id), post=Post(id)).count()
+    print(Like.objects.filter(user=User(request.user.id), post=Post(id)))
     print(like)
     if like == 0:
         print(json.dumps({"liked": "false"}))
