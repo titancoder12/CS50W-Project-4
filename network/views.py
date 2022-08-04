@@ -136,7 +136,9 @@ def updatepost(request, id):
 
         # Check to see if likes is in the PUT request
         if "addlikes" in list(request_json.keys()):
-            like = Like(user=User(request.user.id), post=Post(post))
+            print(post.id)
+            like = Like(user=User(request.user.id), post=Post(post.id))
+            print(like)
             like.save()
 
             # Update the post likes
@@ -149,7 +151,8 @@ def updatepost(request, id):
             argsrecieved += 1
 
         if "removelikes" in list(request_json.keys()):
-            like = Like.objects.get(post = Post(id), user=User(request.user.id))
+            like = Like.objects.get(post=Post(id), user=User(request.user.id))
+            print(like)
             like.delete()
 
             # Update the post likes
@@ -241,7 +244,7 @@ def like(request, id):
     print(like)
     if like == 0:
         print(json.dumps({"liked": "false"}))
-        return json.dumps({"liked": "false"})
+        return JsonResponse(json.dumps({"liked": "false"}), safe=False)
     else:
         print(json.dumps({"liked": "true"}))
-        return json.dumps({"liked": "true"})
+        return JsonResponse(json.dumps({"liked": "true"}), safe=False)

@@ -24,6 +24,7 @@ function addpost(){
 }
 
 function like(post_id) {
+    console.log("like");
     fetch('/post/'+post_id, {
         method: 'PUT',
         body: JSON.stringify({
@@ -33,6 +34,7 @@ function like(post_id) {
 }
 
 function unlike(post_id) {
+    console.log("unlike");
     fetch('/post/'+post_id, {
         method: 'PUT',
         body: JSON.stringify({
@@ -62,15 +64,18 @@ function loadposts(){
                 document.querySelector('#posts').append(postdiv);
 
                 const likebtn = document.createElement('i')
+                postdiv.append(likebtn);
                 fetch('/like/'+myresult[i]["id"])
                 .then((result)=>result.json())
                 .then((result)=>{
                     console.log(result)
                     if (result["liked"] == "true"){
                         likebtn.className = "ms-4 bi bi-heart-fill"; 
+                        postdiv.append(likebtn);
                     }
                     else {
                         likebtn.className = "bi bi-heart ms-4";
+                        postdiv.append(likebtn);
                     }
                 });
                 likebtn.addEventListener('click', function() {
@@ -79,16 +84,17 @@ function loadposts(){
                     .then((result)=>{
                         console.log(result)
                         if (result["liked"] == "true"){
-                            likebtn.className = "ms-4 bi bi-heart-fill"; 
-                            like(myresult[i]["id"]);
-                        }
-                        else {
-                            likebtn.className = "bi bi-heart ms-4";
+                            likebtn.className = "bi bi-heart-fill ms-4";
                             unlike(myresult[i]["id"]);
+                            postdiv.append(likebtn);
+                        }
+                        else if (result["liked"] == "false"){
+                            likebtn.className = "ms-4 bi bi-heart"; 
+                            like(myresult[i]["id"]);
+                            postdiv.append(likebtn);
                         }
                     });
                 });
-                postdiv.append(likebtn);
             })
         };
     });
