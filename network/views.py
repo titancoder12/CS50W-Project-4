@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 import json
 
-from .models import User, Follow, Post
+from .models import User, Follow, Post, Like
 
 
 def index(request):
@@ -136,6 +136,9 @@ def updatepost(request, id):
 
         # Check to see if likes is in the PUT request
         if "addlikes" in list(request_json.keys()):
+            like = Like(user=User(request.user.id), post=post)
+            like.save()
+
             # Update the post likes
             post.likes = post.likes + 1
 
@@ -144,6 +147,20 @@ def updatepost(request, id):
 
             # Add 1 to args recieved for checking later
             argsrecieved += 1
+
+        if "removelikes" in list(request_json.keys()):
+            like = Like.objects.get(post = Post(id), user=User(request.user.id))
+            like.delete()
+
+            # Update the post likes
+            post.likes = post.likes - 1
+
+            # Save the post
+            post.save()
+
+            # Add 1 to args recieved for checking later
+            argsrecieved += 1
+            
 
         # Check to see if text is in the PUT request
         if "text" in list(request_json.keys()):
@@ -218,8 +235,13 @@ def follow(request, user_id=None):
         # Return success message
         return json.dumps({"message": "Successfully updated follow"})
 
-        
-            
-                 
- 
-
+def like(request, id):
+    like = Like.objects.filter(post=id, user=request.user.id).count()
+    print(Like.objects.filter(post=id, user=request.user.id))
+    print(like)
+    if like == 0:
+        print(json.dumps({"liked": "false"}))
+        return json.dumps({"liked": "false"})
+    else:
+        print(json.dumps({"liked": "true"}))
+        return json.dumps({"liked": "true"})

@@ -32,6 +32,15 @@ function like(post_id) {
     });
 }
 
+function unlike(post_id) {
+    fetch('/post/'+post_id, {
+        method: 'PUT',
+        body: JSON.stringify({
+            removelikes: 1
+        })
+    });
+}
+
 function loadposts(){
     let username = '';
     let myresult = [];
@@ -53,10 +62,31 @@ function loadposts(){
                 document.querySelector('#posts').append(postdiv);
 
                 const likebtn = document.createElement('i')
-                likebtn.className = "bi bi-heart ms-4";
+                fetch('/like/'+myresult[i]["id"])
+                .then((result)=>result.json())
+                .then((result)=>{
+                    console.log(result)
+                    if (result["liked"] == "true"){
+                        likebtn.className = "ms-4 bi bi-heart-fill"; 
+                    }
+                    else {
+                        likebtn.className = "bi bi-heart ms-4";
+                    }
+                });
                 likebtn.addEventListener('click', function() {
-                    likebtn.className = "ms-4 bi bi-heart-fill"; 
-                    like(myresult[i]["id"]);
+                    fetch('/like/'+myresult[i]["id"])
+                    .then((result)=>result.json())
+                    .then((result)=>{
+                        console.log(result)
+                        if (result["liked"] == "true"){
+                            likebtn.className = "ms-4 bi bi-heart-fill"; 
+                            like(myresult[i]["id"]);
+                        }
+                        else {
+                            likebtn.className = "bi bi-heart ms-4";
+                            unlike(myresult[i]["id"]);
+                        }
+                    });
                 });
                 postdiv.append(likebtn);
             })

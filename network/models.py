@@ -29,6 +29,6 @@ class Post(models.Model):
             "likes": self.likes
         }
 
-# class Like(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="like")
-#     post = models.ForeignKey(Post, on_delete=models.PROTECT, related_name="likes")
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="userlikerelationship")
+    post = models.ForeignKey(Post, on_delete=models.PROTECT, related_name="userlikerelationship")
