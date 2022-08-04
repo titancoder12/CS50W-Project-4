@@ -100,7 +100,7 @@ def newpost(request):
         post.save()
 
         # Return success message
-        return json.dumps({"message": "New post added successfully"})
+        return JsonResponse(json.dumps({"message": "New post added successfully"}), safe=False)
 
     # Return error message if request method is not POST
     return json.dumps({"message": "POST requests only"})
@@ -127,7 +127,7 @@ def updatepost(request, id):
     
     # Check to see if request method is PUT
     if request.method == "PUT":
-        print(request_json)
+        #print("update post" + request_json)
         # Get post from database
         post = Post.objects.get(id=id)
 
@@ -138,7 +138,7 @@ def updatepost(request, id):
         if "addlikes" in list(request_json.keys()):
             print(post.id)
             like = Like(user=User(request.user.id), post=Post(post.id))
-            print(like)
+            #print("adding " + like)
             like.save()
 
             # Update the post likes
@@ -152,7 +152,7 @@ def updatepost(request, id):
 
         if "removelikes" in list(request_json.keys()):
             like = Like.objects.get(post=Post(id), user=User(request.user.id))
-            print(like)
+            #print("deleting " + like)
             like.delete()
 
             # Update the post likes
@@ -182,7 +182,7 @@ def updatepost(request, id):
             return json.dumps({"message": "Unrecognized argument provided in PUT request"})
 
         # Return success message
-        return json.dumps({"message": "Post updated successfully"})
+        return JsonResponse(json.dumps({"message": "Post updated successfully"}), safe=False)
     else:
         # Return error message
         return json.dumps({"message": "PUT requests only"})

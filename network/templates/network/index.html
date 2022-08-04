@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block body %}
+    <div id="user_id" style="visibility: hidden; display:inline;">{{ request.user.id }}</div>
     <h1 class="ms-2">All Posts</h1>
     {% if user.is_authenticated %}
     <div id="createpost" class="card ms-2">
