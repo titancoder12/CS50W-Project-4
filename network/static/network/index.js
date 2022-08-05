@@ -14,9 +14,9 @@ function addpost(){
         body: JSON.stringify({
             text: text
         })
-    }).then((result)=>console.log(result))
+    })//.then((result)=>console.log(result))
     .then(()=>{
-        document.querySelector('#posttext').value = '';
+        document.querySelector('#posttext').innerHTML = '';
         clear();
         document.querySelector('#posts').innerHTML = '';
         loadposts();
@@ -25,7 +25,7 @@ function addpost(){
 }
 
 function like(post_id) {
-    console.log("like");
+    //console.log("like");
     fetch('/post/'+post_id, {
         method: 'PUT',
         body: JSON.stringify({
@@ -35,7 +35,7 @@ function like(post_id) {
 }
 
 function unlike(post_id) {
-    console.log("unlike");
+    //console.log("unlike");
     fetch('/post/'+post_id, {
         method: 'PUT',
         body: JSON.stringify({
@@ -45,77 +45,99 @@ function unlike(post_id) {
 }
 
 function loadposts(){
-    let username = '';
-    let myresult = [];
+    //let username = '';
+    //let myresult = [];
     fetch('/posts')
-    .then((result)=>result.json())
-    //.then((result)=>JSON.parse(result))
-    .then((result)=>{
-        myresult = result;
-    })
-    .then(()=>{
+    .then((response)=>response.json())
+    //.then((data)=>JSON.parse(data))
+    .then((myresult)=>{
         for (let i = 0; i < myresult.length; i++){
-            fetch('/user/'+myresult[i]["user_id"])
-            .then((result)=>result.json())
+            //console.log(i)
+            //fetch('/user/'+myresult[i]["user_id"])
+            //.then((result)=>result.json())
             //.then((result)=>JSON.parse(result))
-            .then((user_result) => {
-                username = user_result.username;
+            //.then((user_result) => {
+            //    username=user_result["username"];
+            //    console.log(username);
+            //});
+                //console.log("***"+i);
+                const likes = document.createElement('p');
+                likes.style.color = "rgb(128, 128, 128)";
+                //console.log(myresult[i]["likes"]);
+                likes.innerHTML = `${myresult[i]["likes"]} like(s)`;
+                likes.id = myresult[i]["likes"];
+
+                //username = user_result.username;
                 const postdiv = document.createElement('div');
-                postdiv.innerHTML = `<div class="card-body ms-2"><h5 class="ms-2">${username}</h5>${myresult[i].text}<hr><p style="color: rgb(211, 211, 211)">${myresult[i].timestamp}</p></div>`;
+                postdiv.innerHTML = `<div class="card-body ms-2"><h5 class="ms-2">${myresult[i].user}</h5>${myresult[i].text}<hr><p style="color: rgb(211, 211, 211)">${myresult[i].timestamp}</p></div>`;
                 postdiv.classList.add('card');
                 postdiv.classList.add('ms-2');
                 document.querySelector('#posts').append(postdiv);
                 const likebtn = document.createElement('i');
-                postdiv.append(likebtn);
+                //likebtn.setAttribute('nowrap', '');
+                //likes.style.display = "inline";
+                //postdiv.style.wordBreak = "break-word";
+                //postdiv.append(likebtn);
+                //likebtn.style.display = "inline-block";
+                //likes.style.display = "inline-block";
                 fetch('/like/'+myresult[i]["id"])
                 .then((result)=>result.json())
                 .then((result)=>JSON.parse(result))
                 .then((result)=>{
-                    console.log("result:"+result)
+                    //console.log("result:"+result)
                     if (result["liked"] == "true"){
                         likebtn.className = "ms-4 bi bi-heart-fill"; 
-                        postdiv.append(likebtn);
+                        //postdiv.append(likes);
+                        //postdiv.append(likebtn);
                     }
                     else {
                         likebtn.className = "bi bi-heart ms-4";
-                        postdiv.append(likebtn);
+                        //postdiv.append(likes);
+                        //postdiv.append(likebtn);
                     }
                 });
                 likebtn.addEventListener('click', function() {
-                    console.log("!@#$%^&^%$#$%^&^%$%^&%$%^%$%^%$%^%$%^%$%^%^&^%^&%^%$%^%$^&^%^&^%^&%&^%^&^%^&%&^%^&^%^& Like button clicked")
+                    //console.log("!@#$%^&^%$#$%^&^%$%^&%$%^%$%^%$%^%$%^%$%^%^&^%^&%^%$%^%$^&^%^&^%^&%&^%^&^%^&%&^%^&^%^& Like button clicked")
                     fetch('/like/'+myresult[i]["id"])
                     .then((response)=>response.json())
                     .then((data)=>JSON.parse(data))
                     .then((result)=>{
-                        console.log(result);
+                        //console.log(result);
                         //console.log("liked is " + String(result['liked']));
-                        console.log("result is: " + typeof(result)); // result is actually a string
-                        console.log(result["liked"] == 'false');
+                        //console.log("result is: " + typeof(result)); // result is actually a string
+                        //console.log(result["liked"] == 'false');
                         if (result["liked"] == "true"){
-                            console.log("unlike")
+                            //console.log("unlike")
                             likebtn.className = "bi bi-heart ms-4";
                             unlike(myresult[i]["id"]);
-                            postdiv.append(likebtn);
+                            likes.innerHTML = `${parseInt(likes.id) - 1} like(s)`;
+                            likes.id = parseInt(likes.id) - 1;
                             //postdiv.append(likebtn);
-                            return console.log("added like");
+                            //postdiv.append(likes);
+                            //postdiv.append(likebtn);
+                            //return console.log("added like");
                         }
                         else if (result["liked"] == "false"){
-                            console.log("like")
+                            //console.log("like")
                             likebtn.className = "ms-4 bi bi-heart-fill"; 
                             like(myresult[i]["id"]);
-                            postdiv.append(likebtn);
-                            return console.log("removed like");
+                            likes.innerHTML = `${parseInt(likes.id) + 1} like(s)`;
+                            likes.id = parseInt(likes.id) + 1;
+                            //postdiv.append(likebtn);
+                            //return console.log("removed like");
                         }
                     });
-                    postdiv.append(likebtn);
+                    //postdiv.append(likebtn);
+                    //postdiv.append(likes);
                 });
-                console.log(myresult[i]["user_id"]);
-                console.log(document.querySelector('#user_id').innerHTML)
+                //console.log(myresult[i]["user_id"]);
+                //console.log(document.querySelector('#user_id').innerHTML)
                 if (myresult[i]["user_id"] == parseInt(document.querySelector('#user_id').innerHTML)){
                     const editbutton = document.createElement('button');
                     editbutton.className = "ms-4 me-auto btn btn-primary";
                     editbutton.innerHTML="Edit";
                     editbutton.id = "editbtn";
+                    editbutton.style.display = "inline-block";
                     //editbutton.style.textAlign = "left";
                     //editbutton.style.width = "20px";
                     editbutton.addEventListener('click', ()=>{
@@ -123,13 +145,31 @@ function loadposts(){
                     })
                     postdiv.append(editbutton);
                 }
-                //likebtn.style.display = "inline";
-                const likes = document.createElement('p');
-                likes.style.color = "rgb(128, 128, 128)";
-                console.log(myresult[i]["likes"]);
-                likes.innerHTML = myresult[i]["likes"];
+                likes.className = "ms-3"
+                postdiv.append(likebtn);
                 postdiv.append(likes);
-            })
+                if (i == 9){
+                    const pagination = document.createElement('ul');
+                    pagination.className = "pagination";
+                    const firstpaginationitem = document.createElement('ul');
+                    firstpaginationitem.innerHTML = 1;
+                    pagination.append(firstpaginationitem);
+                    //console.log('pagination');
+                    let paginationnumber = 0;
+                    for (let j = 9; j < myresult.length; j++){
+                        if ((j % 9) === 0){
+                            const paginationitem = document.createElement('li');
+                            paginationitem.innerHTML = paginationnumber;
+                            paginationnumber += 1;
+                            pagination.append(paginationitem);
+                        }
+                    }
+                    document.querySelector('#posts').append(pagination);
+
+                }
+
+           
+            //});
         };
     });
 }

@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.urls import reverse
 import json
+from django.core.paginator import Paginator
 
 from .models import User, Follow, Post, Like
 
@@ -66,10 +67,15 @@ def register(request):
 
 def posts(request):
     # Get all recent posts
-    posts = Post.objects.all().order_by('-id').values()
-
+    posts = Post.objects.all().order_by('-id')
+    #print("\n" + str([post for post in posts]) + "\n")
+    page = request.GET.get('page')
+    response = []
+    for post in posts:
+        serializedpost = post.serialize()
+        response.append(serializedpost)
     # Return all posts
-    return JsonResponse([post for post in posts], safe=False)
+    return JsonResponse(response, safe=False)
 
 def user(request, id):
     user = User.objects.get(id=id)
@@ -136,7 +142,7 @@ def updatepost(request, id):
 
         # Check to see if likes is in the PUT request
         if "addlikes" in list(request_json.keys()):
-            print(post.id)
+            #print(post.id)
             like = Like(user=User(request.user.id), post=Post(post.id))
             #print("adding " + like)
             like.save()
@@ -240,11 +246,11 @@ def follow(request, user_id=None):
 
 def like(request, id):
     like = Like.objects.filter(user=User(request.user.id), post=Post(id)).count()
-    print(Like.objects.filter(user=User(request.user.id), post=Post(id)))
-    print(like)
+    #print(Like.objects.filter(user=User(request.user.id), post=Post(id)))
+    #print(like)
     if like == 0:
-        print(json.dumps({"liked": "false"}))
+        #print(json.dumps({"liked": "false"}))
         return JsonResponse(json.dumps({"liked": "false"}), safe=False)
     else:
-        print(json.dumps({"liked": "true"}))
+        #print(json.dumps({"liked": "true"}))
         return JsonResponse(json.dumps({"liked": "true"}), safe=False)
