@@ -16,12 +16,12 @@ function addpost(){
         })
     })//.then((result)=>console.log(result))
     .then(()=>{
-        document.querySelector('#posttext').innerHTML = '';
+        document.querySelector('#posttext').value = '';
         clear();
         document.querySelector('#posts').innerHTML = '';
-        loadposts();
+        loadposts(1);
     });
-    return false;
+    //return false;
 }
 
 function like(post_id) {
@@ -44,10 +44,10 @@ function unlike(post_id) {
     });
 }
 
-function loadposts(){
+function loadposts(pagination=1){
     //let username = '';
     //let myresult = [];
-    fetch('/posts')
+    fetch('/posts?page='+pagination)
     .then((response)=>response.json())
     //.then((data)=>JSON.parse(data))
     .then((myresult)=>{
@@ -149,22 +149,25 @@ function loadposts(){
                 postdiv.append(likebtn);
                 postdiv.append(likes);
                 if (i == 9){
-                    const pagination = document.createElement('ul');
-                    pagination.className = "pagination";
-                    const firstpaginationitem = document.createElement('ul');
-                    firstpaginationitem.innerHTML = 1;
-                    pagination.append(firstpaginationitem);
-                    //console.log('pagination');
-                    let paginationnumber = 0;
-                    for (let j = 9; j < myresult.length; j++){
-                        if ((j % 9) === 0){
+                    const paginationlist = document.createElement('ul');
+                    paginationlist.className = "ms-4 pagination";
+                    let paginationnumber = 1;
+                    fetch("/paginationpages")
+                    .then((result)=>result.json())
+                    .then((result)=>{
+                        for (let j = 0; j < result["pages"]; j++){
                             const paginationitem = document.createElement('li');
-                            paginationitem.innerHTML = paginationnumber;
+                            paginationitem.innerHTML = `<a class=\"page-link\" href=\"">${paginationnumber}</a>`;
+                            paginationitem.className = "page-item";
+                            console.log(`${paginationnumber} = ${pagination}`)
+                            if (parseInt(paginationnumber) == parseInt(pagination)){
+                                paginationitem.className = "page-item active"
+                            } 
+                            paginationlist.append(paginationitem);
                             paginationnumber += 1;
-                            pagination.append(paginationitem);
                         }
-                    }
-                    document.querySelector('#posts').append(pagination);
+                        document.querySelector('#posts').append(paginationlist);
+                    })
 
                 }
 

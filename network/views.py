@@ -74,15 +74,26 @@ def posts(request):
     for post in posts:
         serializedpost = post.serialize()
         response.append(serializedpost)
+    
+    paginator = Paginator(response, 10)
+    print(paginator.count)
+    print(paginator.num_pages)
     # Return all posts
-    return JsonResponse(response, safe=False)
+    print(paginator.page(int(page)).object_list)
+    return JsonResponse(paginator.page(int(page)).object_list, safe=False)
 
 def user(request, id):
     user = User.objects.get(id=id)
     username = user.username
     return JsonResponse({"username": username}, safe=True)
     
+def pages(request):
+    posts = Post.objects.all().order_by('-id').values()
+    paginator = Paginator(posts, 10)
+    pages = paginator.num_pages
+    return JsonResponse({"pages": pages}, safe=True)
 
+    
 
 @csrf_exempt
 def newpost(request):
