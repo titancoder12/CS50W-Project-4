@@ -57,15 +57,15 @@ function loadposts(){
         for (let i = 0; i < myresult.length; i++){
             fetch('/user/'+myresult[i]["user_id"])
             .then((result)=>result.json())
-            .then((result) => {
-                username = result.username;
+            //.then((result)=>JSON.parse(result))
+            .then((user_result) => {
+                username = user_result.username;
                 const postdiv = document.createElement('div');
                 postdiv.innerHTML = `<div class="card-body ms-2"><h5 class="ms-2">${username}</h5>${myresult[i].text}<hr><p style="color: rgb(211, 211, 211)">${myresult[i].timestamp}</p></div>`;
                 postdiv.classList.add('card');
                 postdiv.classList.add('ms-2');
                 document.querySelector('#posts').append(postdiv);
-
-                const likebtn = document.createElement('i')
+                const likebtn = document.createElement('i');
                 postdiv.append(likebtn);
                 fetch('/like/'+myresult[i]["id"])
                 .then((result)=>result.json())
@@ -119,10 +119,16 @@ function loadposts(){
                     //editbutton.style.textAlign = "left";
                     //editbutton.style.width = "20px";
                     editbutton.addEventListener('click', ()=>{
-    
+                        
                     })
                     postdiv.append(editbutton);
                 }
+                //likebtn.style.display = "inline";
+                const likes = document.createElement('p');
+                likes.style.color = "rgb(128, 128, 128)";
+                console.log(myresult[i]["likes"]);
+                likes.innerHTML = myresult[i]["likes"];
+                postdiv.append(likes);
             })
         };
     });
