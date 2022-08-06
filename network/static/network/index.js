@@ -44,6 +44,7 @@ function unlike(post_id) {
     });
 }
 
+var cancelled = false;
 function loadposts(pagination=1){
     //let username = '';
     //let myresult = [];
@@ -156,6 +157,9 @@ function loadposts(pagination=1){
                     .then((result)=>result.json())
                     .then((result)=>{
                         for (let j = 0; j < result["pages"]; j++){
+                            if (cancelled) {
+                                return;
+                            }
                             const paginationitem = document.createElement('li');
                             paginationitem.innerHTML = `<a class=\"page-link\" href=\"">${paginationnumber}</a>`;
                             paginationitem.className = "page-item";
@@ -164,6 +168,13 @@ function loadposts(pagination=1){
                                 paginationitem.className = "page-item active"
                             } 
                             paginationlist.append(paginationitem);
+
+                            paginationitem.onclick = function() {
+                                cancelled = true;
+                            }
+                            paginationitem.onclick = clear();
+                            paginationitem.onclick = loadposts(paginationnumber);
+                            
                             paginationnumber += 1;
                         }
                         document.querySelector('#posts').append(paginationlist);
@@ -178,5 +189,5 @@ function loadposts(pagination=1){
 }
 
 function clear(){
-    document.querySelector('#posts').value = '';
+    document.querySelector('#posts').innerHTML = '';
 }
