@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 function addpost(){
     //const csrftoken = Cookies.get('csrftoken');
-    console.log('calling addpost');
+    //console.log('calling addpost');
     text = document.querySelector('#posttext').value;
     fetch('/post', {
         method: 'POST',
@@ -44,7 +44,7 @@ function unlike(post_id) {
     });
 }
 
-var cancelled = false;
+//var cancelled = false;
 function loadposts(pagination=1){
     clear();
     document.querySelector('#posts').innerHTML = '';
@@ -54,6 +54,7 @@ function loadposts(pagination=1){
     .then((response)=>response.json())
     //.then((data)=>JSON.parse(data))
     .then((myresult)=>{
+        let notdoneyet = true;
         for (let i = 0; i < myresult.length; i++){
             //console.log(i)
             //fetch('/user/'+myresult[i]["user_id"])
@@ -151,23 +152,35 @@ function loadposts(pagination=1){
                 likes.className = "ms-3"
                 postdiv.append(likebtn);
                 postdiv.append(likes);
-                if (i == 9){
+
+                console.log("outside fetch");
+                fetch('/paginationpages').then(result=>result.json()).then((result)=>{
+                    pages = result["pages"];
+                }).then(()=>{
+                
+                console.log("inside fetch");
+                if ((i == 9) || ((pagination == pages)) && (notdoneyet)){
+                    notdoneyet = false;
+                    console.log(`${pagination}`);
                     const paginationlist = document.createElement('ul');
                     paginationlist.className = "ms-4 pagination";
-                    let paginationnumber = 1;
+                    if (pagination !== 1){
+                        const previousbtn = document.createElement('li');
+                        previousbtn.className = "page-item";
+                        previousbtn.innerHTML = `<a class=\"page-link\" onclick=loadposts(${pagination-1})>Previous</a>`;
+                        paginationlist.append(previousbtn);
+                    }
+                    let paginationnumber = 0;
                     fetch("/paginationpages")
                     .then((result)=>result.json())
                     .then((result)=>{
                         for (let j = 0; j < result["pages"]; j++){
-                            if (cancelled) {
-                                return;
-                            }
+                            paginationnumber = j+1;
                             const paginationitem = document.createElement('li');
                             paginationitem.innerHTML = `<a class=\"page-link\" onclick=loadposts(${paginationnumber})>${paginationnumber}</a>`;
                             paginationitem.className = "page-item";
-                            console.log(`${paginationnumber} = ${pagination}`)
                             if (parseInt(paginationnumber) == parseInt(pagination)){
-                                paginationitem.className = "page-item active"
+                                paginationitem.className = "page-item active";
                             } 
                             paginationlist.append(paginationitem);
 
@@ -178,12 +191,17 @@ function loadposts(pagination=1){
                             //paginationitem.onclick = clear();
                             //paginationitem.onclick = loadposts(paginationnumber);
                             
-                            paginationnumber += 1;
+                        }
+                        if (pagination !== paginationnumber){
+                            const nextbtn = document.createElement('li');
+                            nextbtn.className = "page-item";
+                            nextbtn.innerHTML = `<a class=\"page-link\" onclick=loadposts(${pagination+1})>Next</a>`;
+                            paginationlist.append(nextbtn);
                         }
                         document.querySelector('#posts').append(paginationlist);
                     })
 
-                }
+                }});
 
            
             //});
