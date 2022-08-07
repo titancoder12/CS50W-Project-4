@@ -46,6 +46,8 @@ function unlike(post_id) {
 
 var cancelled = false;
 function loadposts(pagination=1){
+    clear();
+    document.querySelector('#posts').innerHTML = '';
     //let username = '';
     //let myresult = [];
     fetch('/posts?page='+pagination)
@@ -161,7 +163,7 @@ function loadposts(pagination=1){
                                 return;
                             }
                             const paginationitem = document.createElement('li');
-                            paginationitem.innerHTML = `<a class=\"page-link\" href=\"">${paginationnumber}</a>`;
+                            paginationitem.innerHTML = `<a class=\"page-link\" onclick=loadposts(${paginationnumber})>${paginationnumber}</a>`;
                             paginationitem.className = "page-item";
                             console.log(`${paginationnumber} = ${pagination}`)
                             if (parseInt(paginationnumber) == parseInt(pagination)){
@@ -169,11 +171,12 @@ function loadposts(pagination=1){
                             } 
                             paginationlist.append(paginationitem);
 
-                            paginationitem.onclick = function() {
-                                cancelled = true;
-                            }
-                            paginationitem.onclick = clear();
-                            paginationitem.onclick = loadposts(paginationnumber);
+                            //paginationitem.onclick = ()=>loadposts(paginationnumber);
+                            //paginationitem.onclick = function() {
+                            //    cancelled = true;
+                            //}
+                            //paginationitem.onclick = clear();
+                            //paginationitem.onclick = loadposts(paginationnumber);
                             
                             paginationnumber += 1;
                         }
