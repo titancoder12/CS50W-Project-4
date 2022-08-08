@@ -205,48 +205,44 @@ def updatepost(request, id):
         # Return error message
         return json.dumps({"message": "PUT requests only"})
     
-def follow(request, user_id=None):
+@csrf_exempt
+def follow(request, user_id):
     # Turn request into a readable dictionary object
-    request_json = json.loads(request.body)
+    #request_json = json.loads(request.body)
     if request.method == "GET":
+        print(user_id)
         if user_id == None:
-            return json.dumps({"message": "Missing argument 'user_id' in GET request"})
-        follow = Follow.objects.get(follower=User(request.user.id), following=User(user_id))
+            return JsonResponse(json.dumps({"message": "Missing argument 'user_id' in GET request"}), safe=False)
+        follows = Follow.objects.filter(follower=User(request.user.id), following=User(user_id)).count()
+        if follows != 0:
+            print('true')
+            return JsonResponse(json.dumps({'following': 'true'}), safe=False)
+        else:
+            print('false')
+            return JsonResponse(json.dumps({'following': 'false'}), safe=False)
     # Check if request method is post
     elif request.method == "POST":
-        # Check if number of arguments is 1
-        if len(list(request_json.keys())) != 1:
-            # Return error message
-            return json.dumps({"message": f"Expected 1 arguments, instead got {len(list(request_json.keys()))} in POST request"})
-        
-        # Check if user id and action are in the list of arguments
-        elif "user_id" not in list(request_json.keys()):
-            # Return error message
-            return json.dumps({"message": "Unrecognized argument provided in POST request"})
-    
+        print('follow')
+        following_user = User.objects.get(id=int(user_id))
+        follower_user = User.objects.get(id=int(request.user.id))
         # Create the new follow
-        follow = Follow(follower=User(request.user.id), following=User(request_json["id"]))
-
+        follow = Follow(follower=User(request.user.id), following=User(user_id))
+        following_user.num_followers = int(following_user.num_followers) + 1
+        follower_user.num_following = int(following_user.num_following) + 1
         # Save the follow
         follow.save()
 
         # Return success message
-        return json.dumps({"message": "Successfully created new follow"})
+        return JsonResponse(json.dumps({"message": "Successfully created new follow"}), safe=False)
 
     elif request.method == "PUT":
-        # Check if number of arguments is 1
-        if len(list(request_json.keys())) != 1:
-            # Return error message
-            return json.dumps({"message": f"Expected 1 argument, instead got {len(list(request_json.keys()))} in POST request"})
-        
-        # Check if user id and action are in the list of arguments
-        elif "user_id" not in list(request_json.keys()):
-            # Return error message
-            return json.dumps({"message": "Unrecognized argument provided in POST request"})
-    
+        print('unfollow')
         # Get the follow
-        follow = Follow.objects.get(follower=User(request.user.id), following=User(request_json["user_id"]))
-
+        follow = Follow.objects.get(follower=User(request.user.id), following=user_id)
+        following_user = User.objects.get(id=int(user_id))
+        follower_user = User.objects.get(id=int(request.user.id))
+        following_user.num_followers = int(following_user.num_followers) - 1
+        follower_user.num_following = int(following_user.num_following) - 1
         # Delete the follow
         follow.delete()
 
@@ -254,7 +250,7 @@ def follow(request, user_id=None):
         # follow.save()
 
         # Return success message
-        return json.dumps({"message": "Successfully updated follow"})
+        return JsonResponse(json.dumps({"message": "Successfully updated follow"}), safe=False)
 
 def like(request, id):
     like = Like.objects.filter(user=User(request.user.id), post=Post(id)).count()
@@ -267,19 +263,32 @@ def like(request, id):
         #print(json.dumps({"liked": "true"}))
         return JsonResponse(json.dumps({"liked": "true"}), safe=False)
 
-def profile(request, user_id):
-    #request_json = json.loads(request.body)
-    posts = Post(user=User(user_id))
-    user = User(id=user_id)
-    num_followers = user.num_followers
-    num_following = user.num_following
-    serializedposts = []
+def profileAPI(request, user_id):
+    # Get all recent posts
+    posts = Post.objects.filter(user=User(user_id)).order_by('-id')
+    #print("\n" + str([post for post in posts]) + "\n")
+    page = request.GET.get('page')
+    response = []
     for post in posts:
-        serializedposts.append(post.serialize())
+        serializedpost = post.serialize()
+        response.append(serializedpost)
+    
+    paginator = Paginator(response, 10)
+    #print(paginator.count)
+    # Return all posts
+    print(paginator.page(int(page)).object_list)
+    return JsonResponse(paginator.page(int(page)).object_list, safe=False)
 
-    return JsonResponse({"posts": serializedposts,
-                        "num_followers": num_followers,
-                        "num_following": num_following
-                        }, safe=False) 
+def profilepages(request, user_id):
+    posts = Post.objects.filter(user=User(user_id)).order_by('-id').values()
+    paginator = Paginator(posts, 10)
+    pages = paginator.num_pages
+    return JsonResponse({"pages": pages}, safe=True)
 
-#def 
+def profile(request, user_id):
+    user = User.objects.get(id=user_id)
+    print(user)
+    return render(request, 'network/profile.html', {"num_followers": user.num_followers,
+                                                    "num_following": user.num_following,
+                                                    "username": user.username,
+                                                    "user_id": user.id})

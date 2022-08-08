@@ -1,30 +1,49 @@
 document.addEventListener('DOMContentLoaded', function(){
-    if (document.querySelector('#user_id').innerHTML !== "not_signed_in"){
-        document.querySelector('#postbutton').addEventListener('click', addpost);
-    }
+    let profile_id = document.querySelector('#profile_id').innerHTML;
+    let user_id = document.querySelector('#user_id').innerHTML;
     //document.querySelector('#postbutton').addEventListener('click', addpost)
     loadposts();
+    //document.querySelector('#followbtn').addEventListener('click')
+    if (profile_id != user_id && user_id != 'not_signed_in'){
+        fetch('/follow/'+document.querySelector('#profile_id').innerHTML)
+        .then((result)=>result.json())
+        .then((result)=>JSON.parse(result))
+        .then((result)=>{
+            if (result['following'] == 'true'){
+                document.querySelector('#followbtn').innerHTML = 'Unfollow';
+            }
+            else if (result['following'] == 'false') {
+                document.querySelector('#followbtn').innerHTML = 'Follow';
+            }
+        });
+        document.querySelector('#followbtn').onclick = function() {
+            fetch('/follow/'+document.querySelector('#profile_id').innerHTML)
+            .then((result)=>result.json())
+            .then((result)=>JSON.parse(result))
+            .then((result)=>{
+                if (result['following'] == 'true'){
+                    console.log('unfollowing')
+                    unfollow(profile_id)
+                    document.querySelector('#followbtn').innerHTML = 'Follow';
+                }
+                else if (result['following'] == 'false') {
+                    console.log('following')
+                    follow(profile_id)
+                    document.querySelector('#followbtn').innerHTML = 'Unfollow';
+                }
+            });
+        }
+    }
+    else {
+        document.querySelector('#followbtn').style.display = 'inline';
+        document.querySelector('#followbtn').style.visibility = 'hidden';
+
+    }
+
 })
 
-function addpost(){
-    //const csrftoken = Cookies.get('csrftoken');
-    //console.log('calling addpost');
-    text = document.querySelector('#posttext').value;
-    fetch('/post', {
-        method: 'POST',
-        //headers: {'X-CSRFToken': csrftoken},
-        //mode: 'same-origin',
-        body: JSON.stringify({
-            text: text
-        })
-    })//.then((result)=>console.log(result))
-    .then(()=>{
-        document.querySelector('#posttext').value = '';
-        clear();
-        document.querySelector('#posts').innerHTML = '';
-        loadposts(1);
-    });
-    //return false;
+function clear(){
+    document.querySelector('#posts').innerHTML = '';
 }
 
 function like(post_id) {
@@ -47,18 +66,19 @@ function unlike(post_id) {
     });
 }
 
-//var cancelled = false;
 function loadposts(pagination=1){
+    let profile_id = document.querySelector('#profile_id').innerHTML;
     clear();
     document.querySelector('#posts').innerHTML = '';
     //let username = '';
     //let myresult = [];
-    fetch('/posts?page='+pagination)
+    fetch(`/profileposts/${profile_id}?page=`+pagination)
     .then((response)=>response.json())
     //.then((data)=>JSON.parse(data))
     .then((myresult)=>{
         let notdoneyet = true;
         for (let i = 0; i < myresult.length; i++){
+            console.log(myresult)
             //console.log(i)
             //fetch('/user/'+myresult[i]["user_id"])
             //.then((result)=>result.json())
@@ -186,7 +206,7 @@ function loadposts(pagination=1){
                 postdiv.append(likes);
 
                 //console.log("outside fetch");
-                fetch('/paginationpages').then(result=>result.json()).then((result)=>{
+                fetch('/profilepages/'+profile_id).then(result=>result.json()).then((result)=>{
                     pages = result["pages"];
                 }).then(()=>{
                 
@@ -204,7 +224,7 @@ function loadposts(pagination=1){
                         paginationlist.append(previousbtn);
                     }
                     let paginationnumber = 0;
-                    fetch("/paginationpages")
+                    fetch("/profilepages/"+profile_id)
                     .then((result)=>result.json())
                     .then((result)=>{
                         for (let j = 0; j < result["pages"]; j++){
@@ -242,6 +262,20 @@ function loadposts(pagination=1){
     });
 }
 
-function clear(){
-    document.querySelector('#posts').innerHTML = '';
+function follow(user_id){
+    fetch('/follow/'+user_id, {
+        method: 'POST',
+        body: JSON.stringify({
+            
+        })
+    });
+}
+
+function unfollow(user_id){
+    fetch('/follow/'+user_id, {
+        method: 'PUT',
+        body: JSON.stringify({
+            
+        })
+    });
 }

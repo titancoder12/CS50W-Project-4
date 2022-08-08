@@ -1,0 +1,31 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% if user.is_authenticated %}
+        <div id="user_id" style="visibility: hidden; display:inline;">{{ request.user.id }}</div>
+    {% else %}
+        <div id="user_id" style="visibility: hidden; display:inline;">not_signed_in</div>
+    {% endif %}
+    <div id="profile_id" style="visibility: hidden; display: inline;">{{ user_id }}</div>
+
+    <div id="profile" class="card ms-2">
+        <div class="card-header">
+            <b>{{ username }}</b>
+          </div>
+        <div class="card-body ms-2">
+            <p class="ms-2"><b>{{ num_followers }}</b> follower(s)</p><p class="ms-2"><b>{{ num_following }}</b> following</p>
+        </div>
+        {% if user.is_authenticated %}
+            <button class="btn btn-primary" id="followbtn"></button>
+        {% endif %}
+    </div>
+    <div id="posts"></div>
+    <div id="pagination"></div>
+    <div id="profile-view"></div>
+{% endblock %}
+
+{% block script %}
+    <!--script type="module" src="/path/to/js.cookie.mjs"></script-->
+    <script src="{% static 'network/profile.js' %}"></script>
+{% endblock %}
