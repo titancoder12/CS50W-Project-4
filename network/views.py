@@ -247,11 +247,11 @@ def follow(request, user_id=None):
         # Get the follow
         follow = Follow.objects.get(follower=User(request.user.id), following=User(request_json["user_id"]))
 
-        # Set status to false
-        follow.status = False
+        # Delete the follow
+        follow.delete()
 
         # Save the follow
-        follow.save()
+        # follow.save()
 
         # Return success message
         return json.dumps({"message": "Successfully updated follow"})
@@ -266,3 +266,20 @@ def like(request, id):
     else:
         #print(json.dumps({"liked": "true"}))
         return JsonResponse(json.dumps({"liked": "true"}), safe=False)
+
+def profile(request, user_id):
+    #request_json = json.loads(request.body)
+    posts = Post(user=User(user_id))
+    user = User(id=user_id)
+    num_followers = user.num_followers
+    num_following = user.num_following
+    serializedposts = []
+    for post in posts:
+        serializedposts.append(post.serialize())
+
+    return JsonResponse({"posts": serializedposts,
+                        "num_followers": num_followers,
+                        "num_following": num_following
+                        }, safe=False) 
+
+#def 

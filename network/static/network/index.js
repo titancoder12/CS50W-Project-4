@@ -76,7 +76,7 @@ function loadposts(pagination=1){
 
                 //username = user_result.username;
                 const postdiv = document.createElement('div');
-                postdiv.innerHTML = `<div class="card-body ms-2"><h5 class="ms-2">${myresult[i].user}</h5>${myresult[i].text}<hr><p style="color: rgb(211, 211, 211)">${myresult[i].timestamp}</p></div>`;
+                postdiv.innerHTML = `<div class="card-body ms-2"><h5 class="ms-2"><a href="/profile/${myresult[i]["user"]}">>${myresult[i].user}</a></h5>${myresult[i].text}<hr><p style="color: rgb(211, 211, 211)">${myresult[i].timestamp}</p></div>`;
                 postdiv.classList.add('card');
                 postdiv.classList.add('ms-2');
                 document.querySelector('#posts').append(postdiv);
