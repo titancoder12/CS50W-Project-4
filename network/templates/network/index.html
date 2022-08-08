@@ -2,7 +2,11 @@
 {% load static %}
 
 {% block body %}
-    <div id="user_id" style="visibility: hidden; display:inline;">{{ request.user.id }}</div>
+    {% if user.is_authenticated %}
+        <div id="user_id" style="visibility: hidden; display:inline;">{{ request.user.id }}</div>
+    {% else %}
+        <div id="user_id" style="visibility: hidden; display:inline;">not_signed_in</div>
+    {% endif %}
     <h1 class="ms-2">All Posts</h1>
     {% if user.is_authenticated %}
     <div id="createpost" class="card ms-2">
@@ -12,9 +16,10 @@
             <button class="btn btn-primary" id="postbutton">Post</button>
         </div>
     </div>
-    <div id="posts"> 
-    <div id="profile-view">
     {% endif %}
+    <div id="posts"></div>
+    <div id="pagination"></div>
+    <div id="profile-view"></div>
 {% endblock %}
 
 {% block script %}

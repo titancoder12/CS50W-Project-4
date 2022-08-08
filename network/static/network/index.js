@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', function(){
-    document.querySelector('#postbutton').addEventListener('click', addpost)
+    if (document.querySelector('#user_id').innerHTML !== "not_signed_in"){
+        document.querySelector('#postbutton').addEventListener('click', addpost);
+    }
+    //document.querySelector('#postbutton').addEventListener('click', addpost)
     loadposts();
 })
 
@@ -77,7 +80,9 @@ function loadposts(pagination=1){
                 postdiv.classList.add('card');
                 postdiv.classList.add('ms-2');
                 document.querySelector('#posts').append(postdiv);
-                const likebtn = document.createElement('i');
+                //if (document.querySelector('#user_id').innerHTML !== "not_signed_in"){
+                    const likebtn = document.createElement('i');
+                //}
                 //likebtn.setAttribute('nowrap', '');
                 //likes.style.display = "inline";
                 //postdiv.style.wordBreak = "break-word";
@@ -90,50 +95,58 @@ function loadposts(pagination=1){
                 .then((result)=>{
                     //console.log("result:"+result)
                     if (result["liked"] == "true"){
-                        likebtn.className = "ms-4 bi bi-heart-fill"; 
+                        if (document.querySelector('#user_id').innerHTML !== "not_signed_in"){
+                            likebtn.className = "ms-4 bi bi-heart-fill"; 
+                        }
                         //postdiv.append(likes);
                         //postdiv.append(likebtn);
                     }
                     else {
-                        likebtn.className = "bi bi-heart ms-4";
+                        if (document.querySelector('#user_id').innerHTML !== "not_signed_in"){
+                            likebtn.className = "bi bi-heart ms-4";
+                        }
                         //postdiv.append(likes);
                         //postdiv.append(likebtn);
                     }
                 });
-                likebtn.addEventListener('click', function() {
-                    //console.log("!@#$%^&^%$#$%^&^%$%^&%$%^%$%^%$%^%$%^%$%^%^&^%^&%^%$%^%$^&^%^&^%^&%&^%^&^%^&%&^%^&^%^& Like button clicked")
-                    fetch('/like/'+myresult[i]["id"])
-                    .then((response)=>response.json())
-                    .then((data)=>JSON.parse(data))
-                    .then((result)=>{
-                        //console.log(result);
-                        //console.log("liked is " + String(result['liked']));
-                        //console.log("result is: " + typeof(result)); // result is actually a string
-                        //console.log(result["liked"] == 'false');
-                        if (result["liked"] == "true"){
-                            //console.log("unlike")
-                            likebtn.className = "bi bi-heart ms-4";
-                            unlike(myresult[i]["id"]);
-                            likes.innerHTML = `${parseInt(likes.id) - 1} like(s)`;
-                            likes.id = parseInt(likes.id) - 1;
-                            //postdiv.append(likebtn);
-                            //postdiv.append(likes);
-                            //postdiv.append(likebtn);
-                            //return console.log("added like");
-                        }
-                        else if (result["liked"] == "false"){
-                            //console.log("like")
-                            likebtn.className = "ms-4 bi bi-heart-fill"; 
-                            like(myresult[i]["id"]);
-                            likes.innerHTML = `${parseInt(likes.id) + 1} like(s)`;
-                            likes.id = parseInt(likes.id) + 1;
-                            //postdiv.append(likebtn);
-                            //return console.log("removed like");
-                        }
-                    });
+                    if (document.querySelector('#user_id').innerHTML !== "not_signed_in"){
+                        likebtn.addEventListener('click', function() {
+                    
+                            //console.log("!@#$%^&^%$#$%^&^%$%^&%$%^%$%^%$%^%$%^%$%^%^&^%^&%^%$%^%$^&^%^&^%^&%&^%^&^%^&%&^%^&^%^& Like button clicked")
+                            fetch('/like/'+myresult[i]["id"])
+                            .then((response)=>response.json())
+                            .then((data)=>JSON.parse(data))
+                            .then((result)=>{
+                                //console.log(result);
+                                //console.log("liked is " + String(result['liked']));
+                                //console.log("result is: " + typeof(result)); // result is actually a string
+                                //console.log(result["liked"] == 'false');
+                                if (result["liked"] == "true"){
+                                    //console.log("unlike")
+                                    likebtn.className = "bi bi-heart ms-4";
+                                    unlike(myresult[i]["id"]);
+                                    likes.innerHTML = `${parseInt(likes.id) - 1} like(s)`;
+                                    likes.id = parseInt(likes.id) - 1;
+                                    //postdiv.append(likebtn);
+                                    //postdiv.append(likes);
+                                    //postdiv.append(likebtn);
+                                    //return console.log("added like");
+                                }
+                                else if (result["liked"] == "false"){
+                                    //console.log("like")
+                                    likebtn.className = "ms-4 bi bi-heart-fill"; 
+                                    like(myresult[i]["id"]);
+                                    likes.innerHTML = `${parseInt(likes.id) + 1} like(s)`;
+                                    likes.id = parseInt(likes.id) + 1;
+                                    //postdiv.append(likebtn);
+                                    //return console.log("removed like");
+                                }
+                            });
+                        })
+                    }
                     //postdiv.append(likebtn);
                     //postdiv.append(likes);
-                });
+                //});
                 //console.log(myresult[i]["user_id"]);
                 //console.log(document.querySelector('#user_id').innerHTML)
                 if (myresult[i]["user_id"] == parseInt(document.querySelector('#user_id').innerHTML)){
@@ -145,7 +158,26 @@ function loadposts(pagination=1){
                     //editbutton.style.textAlign = "left";
                     //editbutton.style.width = "20px";
                     editbutton.addEventListener('click', ()=>{
-                        
+                        postdiv.innerHTML = `<div class="card-body ms-2"><h5 class="ms-2">${myresult[i].user}</h5><textarea class="form-control" id=text${myresult[i]["id"]}>${myresult[i]["text"]}</textarea><button class="btn btn-primary" id="updatepostsubmit${myresult[i]["id"]}">Save</button><button id="cancelupdate${myresult[i]["id"]}" class="btn btn-primary">Cancel</button><hr><p style="color: rgb(211, 211, 211)">${myresult[i].timestamp}</p></div>`;
+                        document.querySelector(`#updatepostsubmit${myresult[i]["id"]}`).addEventListener('click', ()=>{
+                            console.log('saving post');
+                            updatetext = document.querySelector('#text'+myresult[i]["id"]).value;
+                            fetch('/post/'+myresult[i]["id"], {
+                                method: 'PUT',
+                                body: JSON.stringify({
+                                    text: updatetext
+                                })
+                            }).then((result)=>result.json())
+                            .then((result)=>console.log(result))
+                            .then(()=>{
+                                loadposts();
+                                //postdiv.innerHTML = `<div class="card-body ms-2"><h5 class="ms-2">${myresult[i].user}</h5>${updatetext}<hr><p style="color: rgb(211, 211, 211)">${myresult[i].timestamp}</p></div>`;
+                            });
+                        });
+                        document.querySelector('#cancelupdate'+myresult[i]["id"]).addEventListener('click', ()=>{
+                            loadposts();
+                            //postdiv.innerHTML = `<div class="card-body ms-2"><h5 class="ms-2">${myresult[i].user}</h5>${myresult[i]["text"]}<hr><p style="color: rgb(211, 211, 211)">${myresult[i].timestamp}</p></div>`;
+                        });
                     })
                     postdiv.append(editbutton);
                 }
@@ -153,13 +185,14 @@ function loadposts(pagination=1){
                 postdiv.append(likebtn);
                 postdiv.append(likes);
 
-                console.log("outside fetch");
+                //console.log("outside fetch");
                 fetch('/paginationpages').then(result=>result.json()).then((result)=>{
                     pages = result["pages"];
                 }).then(()=>{
                 
-                console.log("inside fetch");
-                if ((i == 9) || ((pagination == pages)) && (notdoneyet)){
+                //console.log("inside fetch");
+                if ((i == 9) || ((pagination == pages) && (notdoneyet))){
+                    document.querySelector('#pagination').innerHTML = '';
                     notdoneyet = false;
                     console.log(`${pagination}`);
                     const paginationlist = document.createElement('ul');
@@ -198,7 +231,7 @@ function loadposts(pagination=1){
                             nextbtn.innerHTML = `<a class=\"page-link\" onclick=loadposts(${pagination+1})>Next</a>`;
                             paginationlist.append(nextbtn);
                         }
-                        document.querySelector('#posts').append(paginationlist);
+                        document.querySelector('#pagination').append(paginationlist);
                     })
 
                 }});

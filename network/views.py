@@ -185,7 +185,8 @@ def updatepost(request, id):
         # Check to see if text is in the PUT request
         if "text" in list(request_json.keys()):
             # Update the post text
-            post.text = request_json.get("text", "")
+            print(request_json["text"])
+            post.text = request_json["text"]
 
             # Save the post
             post.save()

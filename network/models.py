@@ -3,7 +3,8 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    num_followers = models.IntegerField(default=0)
+    num_following = models.IntegerField(default=0)
 
 class Follow(models.Model):
     status = models.BooleanField(default=True)
